@@ -1,2 +1,5 @@
 # hiding api key from spotify
 .env
+
+# hide node_modules
+node_modules
