@@ -3,3 +3,7 @@
 
 # hide node_modules
 node_modules
+
+# hide images 
+logo.png
+spotify_logo.png

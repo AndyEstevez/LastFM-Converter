@@ -18,6 +18,7 @@ module.exports = {
       },
     ],
   },
+ 
   optimization: {
     minimize: true,
   },
@@ -30,3 +31,5 @@ module.exports = {
     }),
   ],
 };
+
+
