@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import GetLovedTracks from './GetLovedTracks';
-// import logo from './logo.png'
+import ErrorPage from './ErrorPage';
 
 class HomePage extends Component {
     constructor(props){
@@ -81,7 +81,8 @@ class HomePage extends Component {
                 
                 <Switch>
                     <Route exact path='/'>{this.renderHomePage()}</Route>
-                    <Route path='/user/:username' component={GetLovedTracks}/>
+                    <Route exact path='/user/:username' component={GetLovedTracks}/>
+                    {/* <Route component={ErrorPage}/> */}
                 </Switch>
             </Router>
         );
