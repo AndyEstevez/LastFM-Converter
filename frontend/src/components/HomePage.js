@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Link, Redirect } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import GetLovedTracks from './GetLovedTracks';
-import ErrorPage from './ErrorPage';
+import Footer from './Footer';
 
 class HomePage extends Component {
     constructor(props){
@@ -9,6 +10,8 @@ class HomePage extends Component {
 
         this.state = {
             username: '',
+            showAlert: false,
+            isHidden: false
         }
 
         this.handleInputChange = this.handleInputChange.bind(this)
@@ -59,11 +62,38 @@ class HomePage extends Component {
                         <input class="input is-medium" type="text" placeholder="e.g. RJ" onChange={this.handleInputChange} style={{ width:"30%", marginBottom: "20px" }}/>                        
                         </div>
                     </div>
-                    <Link to={`/user/${this.state.username}`}>
-                        <button class="button is-primary is-large">Submit</button>
-                    </Link>
+                    <button class="button is-primary is-large" 
+                        value={this.state.username} 
+                        onClick={this.handleSubmit}>
+                        Submit
+                    </button>
+                    {this.state.showAlert 
+                        ? <div class={`notification is-light is-warning ${this.state.isHidden ? 'is-hidden' : null}`} style={{maxWidth: "450px", margin: "auto", marginTop: "25px"}}>
+                            <button class="delete" onClick={this.handleDelete}></button>
+                            Please enter a username!
+                            </div> 
+                        : null}
+                                                            
             </div>
         )
+    }
+
+    handleSubmit = () => {
+        if(this.state.username.trim() == ''){
+            this.setState({
+                showAlert: true,
+                isHidden: false
+            })
+        }
+        else{
+            window.location.href = `/user/${this.state.username}`
+        }
+    }
+    
+    handleDelete = () => {
+        this.setState({
+            isHidden: true
+        })
     }
 
     handleInputChange(event) {
@@ -75,6 +105,7 @@ class HomePage extends Component {
 
     render() {
         return (
+            <div>
             <Router>
                 
                 {this.renderNavbar()}
@@ -82,9 +113,12 @@ class HomePage extends Component {
                 <Switch>
                     <Route exact path='/'>{this.renderHomePage()}</Route>
                     <Route exact path='/user/:username' component={GetLovedTracks}/>
-                    {/* <Route component={ErrorPage}/> */}
                 </Switch>
+
             </Router>
+            <Footer/>
+            </div>
+
         );
     }
 }
