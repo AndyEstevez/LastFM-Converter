@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 class Footer extends Component {
     render() {
         return (
-            <footer class="footer" style={{position: "absolute", bottom: "0", width: "100%", background: "#F14668", color: "white"}}>
+            <footer class="footer" style={{position: "absolute", bottom: "0", width: "100%", background: "#F14668", color: "white",}}>
             <div class="content has-text-centered">
               <p>
                 <strong style={{color: "black"}}>LastFM Converter</strong> by Andy Estevez. The source code is licensed 

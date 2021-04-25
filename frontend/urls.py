@@ -1,5 +1,7 @@
 from django.urls import path, include
-from .views import index, error_404_view
+from .views import index
+
+app_name = 'frontend'
 
 urlpatterns = [
     path('', index, name=''),

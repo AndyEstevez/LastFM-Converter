@@ -18,7 +18,8 @@ export default class GetLovedTracks extends Component {
             username: this.props.match.params.username,
             playlist: [],
             open: false,
-            access: "public"
+            access: "public",
+            isAuthenticated: false,
         }
 
         this.handleOpen = this.handleOpen.bind(this)
@@ -28,6 +29,8 @@ export default class GetLovedTracks extends Component {
 
     // fetch loved tracks of the user based on the url parameter
     async componentDidMount(){
+        
+
         const response = await fetch(`/api/${this.state.username}/loved_tracks`)
             const json = await response.json();
             console.log(json.lovedtracks.track)
@@ -55,7 +58,7 @@ export default class GetLovedTracks extends Component {
 
     render() {
         return (
-            <div>
+            <div style={{paddingBottom: "250px"}}>
                 <button class="button is-medium" onClick={this.handleOpen} style={{ backgroundColor: "#1DB954", 
                         color: "white", 
                         fontWeight: "500", 
@@ -66,10 +69,10 @@ export default class GetLovedTracks extends Component {
                     </span>
                     Add to Spotify
                 </button>
-                <div style={{ textAlign: "center" }}>
+                <div style={{ textAlign: "center", }}>
                     {this.state.playlist.map(function(index){
                         return(
-                            <div>
+                            <div style={{paddingBottom: "2.5rem"}}>
                                 <div>{index.name} by {index.artist.name}</div>
                             </div>
                         )

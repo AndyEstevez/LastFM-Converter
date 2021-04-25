@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Switch, Route, Link, Redirect } from 'react-router-dom';
-import { withRouter } from 'react-router-dom';
 import GetLovedTracks from './GetLovedTracks';
 import Footer from './Footer';
 
@@ -11,10 +10,13 @@ class HomePage extends Component {
         this.state = {
             username: '',
             showAlert: false,
-            isHidden: false
+            isHidden: false,
+            spotifyAuthenticated: false
         }
 
         this.handleInputChange = this.handleInputChange.bind(this)
+        this.authenticateSpotify = this.authenticateSpotify.bind(this)
+
     }
 
     renderNavbar() {
@@ -28,9 +30,9 @@ class HomePage extends Component {
                     <div class="navbar-end">
                         <div class="navbar-item">
                             <div class="field is-grouped">
-                            <p class="control">
+                            <p class="control" onClick={this.authenticateSpotify}>
                                 <a class="bd-tw-button button is-black">
-                                <span class="icon">
+                                <span class="icon" >
                                     <img src={"http://127.0.0.1:8000/static/images/spotify_logo.png"}/>
                                 </span>
                                 <span style={{fontWeight: "bold"}}>
@@ -47,7 +49,7 @@ class HomePage extends Component {
 
     renderHomePage() {
         return(
-            <div style={{textAlign: "center"}}>
+            <div style={{textAlign: "center", paddingBottom: "2.5rem"}}>
                 <h1 style={{ marginTop: "50px", 
                     fontSize:"200%", 
                     height: "2em", 
@@ -78,6 +80,21 @@ class HomePage extends Component {
         )
     }
 
+    async authenticateSpotify() {
+        const response = await fetch('/api/is-authenticated')
+        const json = await response.json()
+
+        this.setState({spotifyAuthenticated: json.status})
+
+        if(!json.status){
+
+            const response = await fetch('/api/get-auth-url')
+            const json = await response.json()
+            console.log(json)
+            window.location.replace(json.url)
+        }
+    }
+
     handleSubmit = () => {
         if(this.state.username.trim() == ''){
             this.setState({
@@ -105,7 +122,7 @@ class HomePage extends Component {
 
     render() {
         return (
-            <div>
+            <div style={{position: "relative", minHeight: "100vh"}}>
             <Router>
                 
                 {this.renderNavbar()}
