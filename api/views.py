@@ -5,8 +5,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 import requests
 from requests import Request, post, get
-from .util import update_or_create_user_tokens, is_spotify_authenticated, get_access_token
-
+from .util import update_or_create_user_tokens, is_spotify_authenticated, get_access_token, refresh_spotify_token
+import json
 
 # Create your views here.
 
@@ -68,7 +68,7 @@ def spotify_callback(request, format=None):
 class IsAuthenticated(APIView):
     def get(self, request, format=None):
         is_authenticated = is_spotify_authenticated(self.request.session.session_key)
-        print("IS AUTHENTICATED:", is_authenticated)
+        # print("IS AUTHENTICATED:", is_authenticated)
 
         if is_authenticated == None:
             is_authenticated = False
@@ -84,11 +84,33 @@ class GetUserID(APIView):
         base_url = "https://api.spotify.com/v1/me"
 
         access_token = get_access_token(self.request.session.session_key)
+        print("ACCESS TOKEN: ", access_token)
+        if access_token == None:
+            refresh_spotify_token(self.request.session.session_key)
+            access_token = get_access_token(self.request.session.session_key)
 
         headers = {'Authorization': 'Bearer {token}'.format(token=access_token)}
 
         response = requests.get(base_url, headers=headers)
-
         response = response.json()
 
         return Response(response['id'], status=status.HTTP_200_OK)
+
+class CreatePlaylist(APIView):
+    def post(self, request, format=None):
+        access_token = get_access_token(self.request.session.session_key)
+
+        base_url = "https://api.spotify.com/v1/users/" + request.data.get('user_id') + "/playlists"
+
+
+        headers = {'Authorization': 'Bearer {token}'.format(token=access_token)}
+        data = json.dumps({
+            'name': request.data.get('name'),
+            'public': request.data.get('public')
+        })
+
+        response = requests.post(url=base_url, data= data, headers={"Content-Type": "application/json", "Authorization": "Bearer " + access_token})
+        response = response.json()
+        print(response)
+
+        return Response(response, status=status.HTTP_200_OK)

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Switch, Route, Link, Redirect } from 'react-router-dom';
 import GetLovedTracks from './GetLovedTracks';
+import SavingPage from './SavingPage';
 import Footer from './Footer';
 
 class HomePage extends Component {
@@ -70,7 +71,7 @@ class HomePage extends Component {
                         Submit
                     </button>
                     {this.state.showAlert 
-                        ? <div class={`notification is-light is-warning ${this.state.isHidden ? 'is-hidden' : null}`} style={{maxWidth: "450px", margin: "auto", marginTop: "25px"}}>
+                        ? <div class={`notification is-warning ${this.state.isHidden ? 'is-hidden' : null}`} style={{maxWidth: "450px", margin: "auto", marginTop: "25px"}}>
                             <button class="delete" onClick={this.handleDelete}></button>
                             Please enter a username!
                             </div> 
@@ -85,7 +86,7 @@ class HomePage extends Component {
         const json = await response.json()
 
         this.setState({spotifyAuthenticated: json.status})
-
+        console.log(this.state.spotifyAuthenticated)
         if(!json.status){
 
             const response = await fetch('/api/get-auth-url')
@@ -130,6 +131,7 @@ class HomePage extends Component {
                 <Switch>
                     <Route exact path='/'>{this.renderHomePage()}</Route>
                     <Route exact path='/user/:username' component={GetLovedTracks}/>
+                    <Route exact path='/saving' component={SavingPage}/>
                 </Switch>
 
             </Router>

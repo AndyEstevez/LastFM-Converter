@@ -9,6 +9,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Radio from '@material-ui/core/Radio';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { Link } from 'react-router-dom'
 
 export default class GetLovedTracks extends Component {
     constructor(props){
@@ -18,10 +19,11 @@ export default class GetLovedTracks extends Component {
             username: this.props.match.params.username,
             playlist: [],
             open: false,
-            access: "public",
+            access: true,
             isAuthenticated: false,
             access_token: '',
             user_id: '',
+            createdPlaylistName: '',
         }
 
         this.handleOpen = this.handleOpen.bind(this)
@@ -64,7 +66,14 @@ export default class GetLovedTracks extends Component {
     handleChange(event) {
         console.log(event.target.value)
         this.setState({
-            access: event.target.value
+            access: !this.state.access
+        })
+    }
+
+    handlePlaylistName = (event) => {
+        console.log(event.target.value)
+        this.setState({
+            createdPlaylistName: event.target.value
         })
     }
 
@@ -97,15 +106,23 @@ export default class GetLovedTracks extends Component {
                     <DialogContentText>
                         Add name & access to playlist
                     </DialogContentText>
-                    <TextField autoFocus margin="dense" id="name" label="Playlist Name" type="text" fullWidth/>
+                    <TextField autoFocus margin="dense" id="name" label="Playlist Name" type="text" fullWidth onChange={this.handlePlaylistName}/>
                     <RadioGroup value={this.state.access} onChange={this.handleChange}>
-                        <FormControlLabel value="public" control={<Radio/>} label="Public"/> 
-                        <FormControlLabel value="private" control={<Radio/>} label="Private"/>
+                        <FormControlLabel value={true} control={<Radio/>} label="Public"/> 
+                        <FormControlLabel value={false} control={<Radio/>} label="Private"/>
                     </RadioGroup>
                     <DialogActions>
-                        <Button>
-                            Save
-                        </Button>
+                        <Link to={{pathname: "/saving", 
+                                    access: this.state.access,
+                                    isAuthenticated: this.state.isAuthenticated,
+                                    playlist: this.state.playlist,
+                                    createdPlaylistName: this.state.createdPlaylistName,
+                                    user_id: this.state.user_id,
+                                    state: this.state }}>
+                            <Button>
+                                Save
+                            </Button>
+                        </Link>
                     </DialogActions>
                     </DialogContent>
                 </Dialog>

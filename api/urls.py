@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import GetLovedTracks, AuthURL, spotify_callback, IsAuthenticated, GetUserID
+from .views import GetLovedTracks, AuthURL, spotify_callback, IsAuthenticated, GetUserID, CreatePlaylist
 
 urlpatterns = [
     path('<str:username>/loved_tracks', GetLovedTracks.as_view()),
@@ -7,4 +7,5 @@ urlpatterns = [
     path('redirect', spotify_callback),
     path('is-authenticated', IsAuthenticated.as_view()),
     path('get-user-id', GetUserID.as_view()),
+    path('create-playlist', CreatePlaylist.as_view())
 ]

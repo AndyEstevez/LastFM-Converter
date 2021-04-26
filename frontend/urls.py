@@ -6,5 +6,5 @@ app_name = 'frontend'
 urlpatterns = [
     path('', index, name=''),
     path('user/<str:username>', index),
-
+    path('saving', index)
 ]
