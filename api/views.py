@@ -4,8 +4,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import requests
-from requests import Request, post
-from .util import update_or_create_user_tokens, is_spotify_authenticated
+from requests import Request, post, get
+from .util import update_or_create_user_tokens, is_spotify_authenticated, get_access_token
 
 
 # Create your views here.
@@ -50,6 +50,8 @@ def spotify_callback(request, format=None):
         'client_secret': str(settings.CLIENT_SECRET)
     }).json()
 
+    print("IN SPOTIFY CALLBACK: ", response)
+    print("USER ID: ", response.get('user_id'))
     access_token = response.get('access_token')
     token_type = response.get('token_type')
     refresh_token = response.get('refresh_token')
@@ -66,5 +68,27 @@ def spotify_callback(request, format=None):
 class IsAuthenticated(APIView):
     def get(self, request, format=None):
         is_authenticated = is_spotify_authenticated(self.request.session.session_key)
-        print(is_authenticated)
+        print("IS AUTHENTICATED:", is_authenticated)
+
+        if is_authenticated == None:
+            is_authenticated = False
         return Response({'status': is_authenticated}, status=status.HTTP_200_OK)
+
+# class GetAccessToken(APIView):
+#     def get(self, request, format=None):
+#         access_token = get_access_token(self.request.session.session_key)
+#         return Response({'access_token': access_token}, status=status.HTTP_200_OK)
+
+class GetUserID(APIView):
+    def get(self, request, format=None):
+        base_url = "https://api.spotify.com/v1/me"
+
+        access_token = get_access_token(self.request.session.session_key)
+
+        headers = {'Authorization': 'Bearer {token}'.format(token=access_token)}
+
+        response = requests.get(base_url, headers=headers)
+
+        response = response.json()
+
+        return Response(response['id'], status=status.HTTP_200_OK)

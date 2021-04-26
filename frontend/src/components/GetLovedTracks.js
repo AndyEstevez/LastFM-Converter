@@ -20,6 +20,8 @@ export default class GetLovedTracks extends Component {
             open: false,
             access: "public",
             isAuthenticated: false,
+            access_token: '',
+            user_id: '',
         }
 
         this.handleOpen = this.handleOpen.bind(this)
@@ -29,12 +31,22 @@ export default class GetLovedTracks extends Component {
 
     // fetch loved tracks of the user based on the url parameter
     async componentDidMount(){
+            fetch('/api/is-authenticated')
+                .then(response => response.json())
+                .then(data => {
+                    this.setState({isAuthenticated: data.status});
+                    if(!data.status){
+                        console.log("NOT AUTHENTICATED")
+                    }
+                })
         
+        const responseUserID = await fetch('/api/get-user-id')
+            const dataID = await responseUserID.json()
 
-        const response = await fetch(`/api/${this.state.username}/loved_tracks`)
-            const json = await response.json();
-            console.log(json.lovedtracks.track)
-            this.setState({ playlist: json.lovedtracks.track })
+        const responseLovedTracks = await fetch(`/api/${this.state.username}/loved_tracks`)
+            const json = await responseLovedTracks.json();
+            this.setState({ playlist: json.lovedtracks.track, user_id: dataID })
+            console.log(this.state.user_id)
     }
 
     handleOpen() {
@@ -56,10 +68,10 @@ export default class GetLovedTracks extends Component {
         })
     }
 
-    render() {
-        return (
-            <div style={{paddingBottom: "250px"}}>
-                <button class="button is-medium" onClick={this.handleOpen} style={{ backgroundColor: "#1DB954", 
+    renderAccess(){
+        return(
+            <div>
+            <button class="button is-medium" onClick={this.handleOpen} style={{ backgroundColor: "#1DB954", 
                         color: "white", 
                         fontWeight: "500", 
                         display: "flex", 
@@ -69,6 +81,7 @@ export default class GetLovedTracks extends Component {
                     </span>
                     Add to Spotify
                 </button>
+
                 <div style={{ textAlign: "center", }}>
                     {this.state.playlist.map(function(index){
                         return(
@@ -96,6 +109,27 @@ export default class GetLovedTracks extends Component {
                     </DialogActions>
                     </DialogContent>
                 </Dialog>
+            </div>
+        )
+    }
+
+    renderForbidden(){
+        return(
+            <div id="app" style={{textAlign:"center", fontWeight: "bold", fontSize: "3em"}}>
+                <div>403</div>
+                <div class="txt">
+                    Forbidden<span class="blink"></span>
+                </div>
+            </div>
+        )
+    }
+
+    render() {
+        return (
+            <div style={{paddingBottom: "250px"}}>
+
+            {this.state.isAuthenticated ? this.renderAccess() : this.renderForbidden() }
+                
 
             </div>
         )
