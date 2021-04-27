@@ -82,17 +82,17 @@ class HomePage extends Component {
     }
 
     async authenticateSpotify() {
-        const response = await fetch('/api/is-authenticated')
-        const json = await response.json()
+        const responseAuthenticate = await fetch('/api/is-authenticated')
+        const jsonAuthenticate = await responseAuthenticate.json()
 
-        this.setState({spotifyAuthenticated: json.status})
+        this.setState({spotifyAuthenticated: jsonAuthenticate.status})
         console.log(this.state.spotifyAuthenticated)
-        if(!json.status){
+        if(!jsonAuthenticate.status){
 
-            const response = await fetch('/api/get-auth-url')
-            const json = await response.json()
-            console.log(json)
-            window.location.replace(json.url)
+            const responseGetAuth = await fetch('/api/get-auth-url')
+            const jsonGetAuth = await responseGetAuth.json()
+            console.log(jsonGetAuth)
+            window.location.replace(jsonGetAuth.url)
         }
     }
 

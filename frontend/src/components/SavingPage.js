@@ -5,11 +5,14 @@ export default class SavingPage extends Component {
         super(props);
 
         this.state = {
-            all_props: props.location.state
+            all_props: props.location.state,
+            tracks_info: [], 
+            json: []
         }
     }
 
-    componentDidMount() {
+    async componentDidMount() {
+        console.log(this.state.all_props.playlist.length)
         const requestOptions = {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
@@ -22,6 +25,23 @@ export default class SavingPage extends Component {
         fetch('/api/create-playlist', requestOptions)
             .then((response) => response.json())
             .then((data) => console.log(data))
+        let tracks = [];
+        
+        for(let i = 0; i < this.state.all_props.playlist.length; i++){
+            const responseTrack = await fetch(`/api/${this.state.all_props.playlist[i].name}/search`)
+                const jsonTrack = await responseTrack.json();
+                const shorterName = jsonTrack.tracks.items
+               
+            for(let j = 0; j < shorterName.length; j++){
+                let name = this.state.all_props.playlist[i].artist.name.toUpperCase()
+                if(name == (shorterName[j].artists[0].name).toUpperCase()){
+                    console.log(shorterName[j])
+                    tracks.push(shorterName[j])
+                    break;
+                }
+            }
+        }
+        
     }
 
     renderForbidden(){

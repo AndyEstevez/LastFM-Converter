@@ -45,32 +45,34 @@ def spotify_callback(request, format=None):
     response = post('https://accounts.spotify.com/api/token', data={
         'grant_type': 'authorization_code',
         'code': code,
-        'redirect_uri': str(settings.REDIRECT_URI),
-        'client_id': str(settings.CLIENT_ID),
-        'client_secret': str(settings.CLIENT_SECRET)
+        'redirect_uri': (settings.REDIRECT_URI),
+        'client_id': (settings.CLIENT_ID),
+        'client_secret': (settings.CLIENT_SECRET)
     }).json()
 
     print("IN SPOTIFY CALLBACK: ", response)
     print("USER ID: ", response.get('user_id'))
-    access_token = response.get('access_token')
-    token_type = response.get('token_type')
+
     refresh_token = response.get('refresh_token')
+    access_token = response.get('access_token')
     expires_in = response.get('expires_in')
+    token_type = response.get('token_type')
     error = response.get('error')
 
     if not request.session.exists(request.session.session_key):
         request.session.create()
 
-    update_or_create_user_tokens(request.session.session_key, access_token, token_type, expires_in, refresh_token)
+    update_or_create_user_tokens(request.session.session_key, refresh_token, access_token, expires_in, token_type)
 
     return redirect('frontend:')
 
 class IsAuthenticated(APIView):
     def get(self, request, format=None):
         is_authenticated = is_spotify_authenticated(self.request.session.session_key)
-        # print("IS AUTHENTICATED:", is_authenticated)
+        print("IS AUTHENTICATED:", is_authenticated)
 
         if is_authenticated == None:
+            print("IT WAS NONE")
             is_authenticated = False
         return Response({'status': is_authenticated}, status=status.HTTP_200_OK)
 
@@ -112,5 +114,17 @@ class CreatePlaylist(APIView):
         response = requests.post(url=base_url, data= data, headers={"Content-Type": "application/json", "Authorization": "Bearer " + access_token})
         response = response.json()
         print(response)
+
+        return Response(response, status=status.HTTP_200_OK)
+
+class SearchTrack(APIView):
+    def get(self, request, name):
+        access_token = get_access_token(self.request.session.session_key)
+
+        base_url = "https://api.spotify.com/v1/search?q=" + name + "&type=track"
+        headers = {'Authorization': 'Bearer {token}'.format(token=access_token)}
+
+        response = requests.get(base_url, headers=headers)
+        response = response.json()
 
         return Response(response, status=status.HTTP_200_OK)
