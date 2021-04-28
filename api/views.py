@@ -8,6 +8,7 @@ from requests import Request, post, get
 from .util import update_or_create_user_tokens, is_spotify_authenticated, get_access_token, refresh_spotify_token
 import json
 
+
 # Create your views here.
 
 # get loved tracks of a user from Last.fm
@@ -118,31 +119,51 @@ class CreatePlaylist(APIView):
         return Response(response, status=status.HTTP_200_OK)
 
 class SearchTrack(APIView):
-    def get(self, request, name):
+    def get(self, request, name, artistName):
         access_token = get_access_token(self.request.session.session_key)
-        if '?' in name:
-            name = name.replace('?', "")
-        print("NAME OF TRACK: ", name)
-        base_url = "https://api.spotify.com/v1/search?q=" + name + "&type=track&limit=25"
-        headers = {'Authorization': 'Bearer {token}'.format(token=access_token)}
-        print(base_url)
-        response = requests.get(base_url, headers=headers)
-        response = response.json()
+        
+        print("ARTIST OF TRACK: ", artistName)
 
-        return Response(response, status=status.HTTP_200_OK)
+        offset_val = 0
+        foundTrack = False
+
+        if '/' in artistName:
+            artistName = artistName.replace('/', '')
+
+        base_url = "https://api.spotify.com/v1/search?q=" + name + "&type=track&limit=50&offset=" + str(offset_val)
+        headers = {'Authorization': 'Bearer {token}'.format(token=access_token)}
+
+        while foundTrack == False or offset_val < 1000:
+        
+            response = requests.get(base_url, headers=headers)
+            response = response.json()
+
+            if "error" in response:
+                return Response('', status=status.HTTP_200_OK)
+
+            if not response['tracks']['items']:
+                return Response('', status=status.HTTP_200_OK)
+
+            for x in response['tracks']['items']:
+                if artistName.lower() == x['artists'][0]['name'].lower():
+                    foundTrack = True
+                    uri = x['uri']
+                    return Response(uri, status=status.HTTP_200_OK)
+
+            base_url = base_url.replace("&offset="+str(offset_val), "&offset="+str(offset_val+50))
+            offset_val = offset_val + 50
+        
+        return Response('', status=status.HTTP_200_OK)
+
 
 class AddTracks(APIView):
     def post(self, request, format=None):
         access_token = get_access_token(self.request.session.session_key)
 
         base_url = "https://api.spotify.com/v1/playlists/" + request.data.get('playlist_id') + "/tracks?uris="
-        print("PLAYLIST ID: ", request.data.get('playlist_id'))
         headers = {'Authorization': 'Bearer {token}'.format(token=access_token)}
         
-        print("URIS: ", request.data.get('uris'))
         base_url = base_url + request.data.get('uris')
-        # base_url = base_url + '%2C'.join(request.data.get('uris'))
-        print("BASE URL: ", base_url)
         response = requests.post(url=base_url, headers={"Content-Type": "application/json", "Authorization": "Bearer " + access_token})
         response = response.json()
 

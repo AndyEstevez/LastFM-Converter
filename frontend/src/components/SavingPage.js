@@ -14,6 +14,8 @@ export default class SavingPage extends Component {
 
     async componentDidMount() {
         console.log(this.state.all_props.playlist.length)
+
+        // fetch request for creating a Spotify Playlist
         const requestOptions = {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
@@ -28,52 +30,38 @@ export default class SavingPage extends Component {
             const playlistId = jsonPlaylist.id
 
         
+        // fetch request for searching each loved track based on track name on Spotify API
         let tracks = "";
         let trackName = "";
         for(let i = 0; i < this.state.all_props.playlist.length; i++){
             trackName = this.state.all_props.playlist[i].name
+            let artistName = this.state.all_props.playlist[i].artist.name
             if (trackName.includes("?")){
                 trackName = trackName.replace(/\?/g,'');
             }
-            const responseTrack = await fetch(`/api/${trackName}/search`)
-                const jsonTrack = await responseTrack.json();
-                const shorterName = jsonTrack.tracks.items
-               
-            for(let j = 0; j < shorterName.length; j++){
-                let name = this.state.all_props.playlist[i].artist.name.toUpperCase()
-                if(name == (shorterName[j].artists[0].name).toUpperCase()){
-                    // console.log(shorterName[j])
-                    tracks = shorterName[j].uri
-                    const optionsAddTracks = {
-                        method: "POST",
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            playlist_id: playlistId,
-                            uris: tracks
-                        }),
-                    }
-            
-                    await fetch('/api/add-tracks', optionsAddTracks)
-                    // tracks.push(shorterName[j].uri)
-                    break;
-                }
+            if (artistName.includes("/")){
+                artistName = artistName.replace(/\//g, ' ');
+                console.log(artistName)
             }
+
+            const responseTrack = await fetch(`/api/${trackName}/${artistName}/search`)
+                const jsonTrack = await responseTrack.json();
+                const uri = jsonTrack
+                
+                
+                const optionsAddTracks = {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        playlist_id: playlistId,
+                        uris: uri
+                    }),
+                }
+                await fetch('/api/add-tracks', optionsAddTracks)
         }
 
         console.log(tracks)
 
-        // const optionsAddTracks = {
-        //     method: "POST",
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({
-        //         playlist_id: playlistId,
-        //         uris: tracks
-        //     }),
-        // }
-
-        // await fetch('/api/add-tracks', optionsAddTracks)
-
-        
     }
 
     renderForbidden(){

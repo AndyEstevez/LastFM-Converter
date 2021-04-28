@@ -8,6 +8,6 @@ urlpatterns = [
     path('is-authenticated', IsAuthenticated.as_view()),
     path('get-user-id', GetUserID.as_view()),
     path('create-playlist', CreatePlaylist.as_view()),
-    path('<str:name>/search', SearchTrack.as_view()),
+    path('<str:name>/<str:artistName>/search', SearchTrack.as_view()),
     path('add-tracks', AddTracks.as_view()),
 ]
