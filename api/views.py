@@ -111,7 +111,7 @@ class CreatePlaylist(APIView):
             'public': request.data.get('public')
         })
 
-        response = requests.post(url=base_url, data= data, headers={"Content-Type": "application/json", "Authorization": "Bearer " + access_token})
+        response = requests.post(url=base_url, data=data, headers={"Content-Type": "application/json", "Authorization": "Bearer " + access_token})
         response = response.json()
         print(response)
 
@@ -120,11 +120,31 @@ class CreatePlaylist(APIView):
 class SearchTrack(APIView):
     def get(self, request, name):
         access_token = get_access_token(self.request.session.session_key)
-
-        base_url = "https://api.spotify.com/v1/search?q=" + name + "&type=track"
+        if '?' in name:
+            name = name.replace('?', "")
+        print("NAME OF TRACK: ", name)
+        base_url = "https://api.spotify.com/v1/search?q=" + name + "&type=track&limit=25"
         headers = {'Authorization': 'Bearer {token}'.format(token=access_token)}
-
+        print(base_url)
         response = requests.get(base_url, headers=headers)
         response = response.json()
 
+        return Response(response, status=status.HTTP_200_OK)
+
+class AddTracks(APIView):
+    def post(self, request, format=None):
+        access_token = get_access_token(self.request.session.session_key)
+
+        base_url = "https://api.spotify.com/v1/playlists/" + request.data.get('playlist_id') + "/tracks?uris="
+        print("PLAYLIST ID: ", request.data.get('playlist_id'))
+        headers = {'Authorization': 'Bearer {token}'.format(token=access_token)}
+        
+        print("URIS: ", request.data.get('uris'))
+        base_url = base_url + request.data.get('uris')
+        # base_url = base_url + '%2C'.join(request.data.get('uris'))
+        print("BASE URL: ", base_url)
+        response = requests.post(url=base_url, headers={"Content-Type": "application/json", "Authorization": "Bearer " + access_token})
+        response = response.json()
+
+        print("RESPONSE: ", response)
         return Response(response, status=status.HTTP_200_OK)
