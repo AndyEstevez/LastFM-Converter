@@ -9,11 +9,14 @@ export default class SavingPage extends Component {
             tracks_info: [], 
             json: [],
             playlistId: '',
+            currentTracksCompleted: 0,
+            trackNotFound: 0,
+            totalTracks: props.location.playlist.length
         }
     }
 
     async componentDidMount() {
-        console.log(this.state.all_props.playlist.length)
+        console.log("TOTAL TRACKS: " + this.state.totalTracks)
 
         // fetch request for creating a Spotify Playlist
         const requestOptions = {
@@ -37,8 +40,14 @@ export default class SavingPage extends Component {
             trackName = this.state.all_props.playlist[i].name
             let artistName = this.state.all_props.playlist[i].artist.name
             if (trackName.includes("?")){
-                trackName = trackName.replace(/\?/g,'');
+                trackName = trackName.replace(/\?/g, '%3F');
             }
+            if (trackName.includes("/")){
+                trackName = trackName.replace(/\//g, '');
+            }
+            // if (trackName.includes('(') || trackName.includes(')')){
+            //     trackName = trackName.replace(/[()]/g, '');
+            // }
             if (artistName.includes("/")){
                 artistName = artistName.replace(/\//g, ' ');
                 console.log(artistName)
@@ -57,11 +66,19 @@ export default class SavingPage extends Component {
                         uris: uri
                     }),
                 }
-                await fetch('/api/add-tracks', optionsAddTracks)
+            const responseAdd = await fetch('/api/add-tracks', optionsAddTracks)
+                const jsonAdd = await responseAdd.json();
+                console.log(jsonAdd)
+                if (jsonAdd.hasOwnProperty('error')){
+                    this.setState({ currentTracksCompleted: this.state.currentTracksCompleted+1, trackNotFound: this.state.trackNotFound+1 })
+                }
+                else{
+                    this.setState({ currentTracksCompleted: this.state.currentTracksCompleted+1})
+                }
         }
-
-        console.log(tracks)
-
+        console.log("tracks not found: " + this.state.trackNotFound)
+        console.log("Tracks completed: " + this.state.currentTracksCompleted)
+        console.log("Total tracks: " + this.state.totalTracks)
     }
 
     renderForbidden(){
@@ -75,11 +92,24 @@ export default class SavingPage extends Component {
         )
     }
     render() {
-        console.log(this.state.all_props)
+        const currentProgress = Math.round((this.state.currentTracksCompleted / this.state.totalTracks) * 100);
         return (
-            <div>
+            <div style={{margin: "auto"}}>
                 {/* {typeof this.state.all_props == undefined ? this.renderForbidden() : null } */}
-                
+                <div style={{ textAlign: "center", fontWeight: "500", }}>
+                    <p>Saving to Spotify</p>
+                    <p>{this.state.currentTracksCompleted} of {this.state.totalTracks}</p>
+                    <p>(Tracks Not Found: {this.state.trackNotFound})</p>
+
+                </div>
+                <div class="progress-wrapper" style={{margin: "auto", width: "50%"}}>
+                    <progress class="progress is-success is-large" 
+                            value={this.state.currentTracksCompleted} 
+                            max={this.state.totalTracks}>
+                            {currentProgress}%
+                    </progress>
+                    <p class="progress-value has-text-black">{currentProgress}%</p>
+                </div>
             </div>
         )
     }

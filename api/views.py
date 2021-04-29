@@ -122,7 +122,7 @@ class SearchTrack(APIView):
     def get(self, request, name, artistName):
         access_token = get_access_token(self.request.session.session_key)
         
-        print("ARTIST OF TRACK: ", artistName)
+        # print("ARTIST OF TRACK: ", artistName)
 
         offset_val = 0
         foundTrack = False
@@ -137,7 +137,7 @@ class SearchTrack(APIView):
         
             response = requests.get(base_url, headers=headers)
             response = response.json()
-
+            
             if "error" in response:
                 return Response('', status=status.HTTP_200_OK)
 
@@ -145,11 +145,16 @@ class SearchTrack(APIView):
                 return Response('', status=status.HTTP_200_OK)
 
             for x in response['tracks']['items']:
-                if artistName.lower() == x['artists'][0]['name'].lower():
+                if x is None:
+                    return Response('', status=status.HTTP_200_OK)
+
+
+                if artistName.lower() == x['artists'][0]['name'].lower() and name.lower() == x['name'].lower():
                     foundTrack = True
                     uri = x['uri']
+                    print(x['uri'])
                     return Response(uri, status=status.HTTP_200_OK)
-
+                
             base_url = base_url.replace("&offset="+str(offset_val), "&offset="+str(offset_val+50))
             offset_val = offset_val + 50
         
